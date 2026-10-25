@@ -1,0 +1,227 @@
+---
+title: Troubleshooting
+description: Diagnose common setup, connectivity, and workflow issues in PerceptEye. Use this guide to resolve errors quickly and keep your agent pipeline moving.
+---
+
+## Overview
+
+Use this guide to diagnose the most common issues you may encounter while setting up PerceptEye, running simulations, training agents, and reviewing results. It is written as a starter kit template, so you can adapt the examples to match your own environment and operational standards.
+
+<Callout kind="info">
+  If you are debugging a live issue, collect the relevant logs first and keep a note of the exact command, timestamp, and workspace name you used.
+</Callout>
+
+### Common issue areas
+
+<Columns cols={3}>
+  <Card title="Connection issues" icon="cloud" href="#connection-and-environment-issues">
+    Check network access, environment variables, and endpoint reachability.
+  </Card>
+  <Card title="Workflow simulation" icon="zap" href="#workflow-simulation-failures">
+    Resolve workflow mapping, input shape, and runtime simulation problems.
+  </Card>
+  <Card title="Training errors" icon="bar-chart" href="#training-and-evaluation-errors">
+    Fix failed runs, missing metrics, and evaluation mismatches.
+  </Card>
+</Columns>
+
+## Connection and environment issues
+
+Connection failures usually come from incorrect endpoints, missing credentials, or blocked outbound traffic. Start by confirming that your client can reach the service and that the environment you deployed to matches the one in your configuration.
+
+### What to verify first
+
+<Steps>
+  <Step title="Confirm environment variables" icon="settings">
+    Make sure your runtime has the expected values for the API base URL, project identifier, and access token. Keep secrets in a secure store and avoid hardcoding them in source files.
+  </Step>
+  <Step title="Check network reachability" icon="cloud">
+    Verify that your machine or cluster can reach the configured endpoint and that firewalls, proxies, or VPN policies are not blocking traffic.
+  </Step>
+  <Step title="Test authentication" icon="shield">
+    Confirm that the token or service account has permission to access the target workspace and that the credential has not expired.
+  </Step>
+</Steps>
+
+### Example connectivity checks
+
+<CodeGroup tabs="bash,JavaScript,Python">
+  ```bash
+  export PERCEPTEYE_BASE_URL="https://api.example.com"
+  export PERCEPTEYE_TOKEN="your-token-here"
+
+  curl -sS https://api.example.com/health \
+    -H "Authorization: Bearer $PERCEPTEYE_TOKEN"
+  ```
+
+  ```javascript
+  const response = await fetch("https://api.example.com/health", {
+    headers: {
+      Authorization: `Bearer ${process.env.PERCEPTEYE_TOKEN}`
+    }
+  });
+
+  const body = await response.json();
+  console.log(body.status);
+  ```
+
+  ```python
+  import os
+  import requests
+
+  response = requests.get(
+      "https://api.example.com/health",
+      headers={"Authorization": f"Bearer {os.environ['PERCEPTEYE_TOKEN']}"}
+  )
+
+  print(response.json()["status"])
+  ```
+</CodeGroup>
+
+<Callout kind="tip">
+  If health checks pass locally but fail in your deployment environment, compare the container image, runtime permissions, and outbound network policy.
+</Callout>
+
+## Workflow simulation failures
+
+Simulation failures often appear when the input schema does not match the workflow definition or when upstream systems return unexpected values. Treat the simulation as a contract check: your workflow should receive the same structure every time.
+
+### Typical causes
+
+- Missing required fields in the simulation payload
+- Invalid workflow version or stale mapping data
+- Unavailable integration target during replay
+- Unexpected null values from upstream systems
+
+### Debugging steps
+
+<Tabs>
+  <Tab title="Schema validation" icon="check-circle">
+    Validate the payload before simulation starts. If the simulator rejects a field, compare the payload keys with the workflow contract and remove any unsupported fields.
+  </Tab>
+  <Tab title="Replay data" icon="database">
+    Confirm that the recorded event or workflow sample still matches the latest shape. If the source system changed, regenerate the sample before you rerun the simulation.
+  </Tab>
+  <Tab title="Runtime logs" icon="terminal">
+    Inspect the simulation log for the exact step that failed. Look for timeouts, serialization errors, and missing dependency messages.
+  </Tab>
+</Tabs>
+
+### Example simulation request
+
+````json
+{
+  "workflowId": "wf-2048",
+  "runLabel": "daily-onboarding-check",
+  "input": {
+    "customerId": "cus_91824",
+    "accountTier": "enterprise",
+    "events": [
+      {
+        "type": "profile_created",
+        "timestamp": "2026-10-25T10:15:30Z"
+      }
+    ]
+  }
+}
+````
+
+If the run fails immediately, reduce the payload to the smallest valid example and reintroduce fields one at a time. This makes it easier to isolate malformed data.
+
+## Training and evaluation errors
+
+Training issues usually come from insufficient data quality, incompatible model settings, or evaluation thresholds that are too strict for the current dataset. When a run fails, separate infrastructure problems from model-quality problems before making changes.
+
+### Practical checks
+
+1. Confirm that the training dataset is accessible and complete.
+2. Verify that the base model selection matches the task.
+3. Review metric definitions and make sure evaluation labels are consistent.
+4. Check whether the pipeline has enough compute and memory for the selected batch size.
+
+<Expandable title="Recommended training diagnostics" default-open="false">
+  
+  Run a small experiment first, then scale up once the end-to-end path succeeds. Use a known-good sample set so you can distinguish environment errors from data issues.
+
+  - Validate the training manifest
+  - Check the dataset size and label distribution
+  - Review the evaluation report for missing metrics
+  - Compare results against the previous successful run
+  
+</Expandable>
+
+### Example training log pattern
+
+````text
+2026-10-25T10:18:04Z INFO  Starting training job: trn-7781
+2026-10-25T10:18:05Z INFO  Loading dataset from secure storage
+2026-10-25T10:18:21Z WARN  Validation set contains 0 labeled samples
+2026-10-25T10:18:22Z ERROR Evaluation aborted: missing ground truth labels
+````
+
+A warning like this usually means the evaluator cannot compute a required metric. Fix the dataset first, then rerun the job.
+
+## Permission and access problems
+
+Access problems are common when you move between environments or rotate credentials. You may be able to sign in successfully but still lack permission to read datasets, start workflows, or view results.
+
+### Access checklist
+
+- Confirm that your user or service account is assigned to the correct workspace
+- Verify that role-based access control allows the action you are trying to perform
+- Check whether a recent token rotation invalidated older clients
+- Make sure the deployment environment uses the same identity provider configuration
+
+<Callout kind="alert">
+  Do not reuse credentials across environments unless your security policy explicitly allows it. Separate development, staging, and production access reduces accidental cross-environment changes.
+</Callout>
+
+### Example permission error
+
+````text
+Error: permission denied
+Action: workflow:run
+Resource: workspace/percepteye-demo
+Resolution: grant the workflow runner role or use a token with the required scope
+````
+
+## Logs and diagnostic checks
+
+When the cause is unclear, gather logs before you restart anything. Consistent log collection helps you compare a failed run with a successful one and shortens time to resolution.
+
+### What to collect
+
+| Signal | Why it helps | Example location |
+|--------|--------------|------------------|
+| Application logs | Shows request flow and failures | Container stdout |
+| Workflow logs | Identifies step-level failures | Pipeline dashboard |
+| Training logs | Captures model and evaluation issues | Job output |
+| Access logs | Reveals denied requests | Gateway or proxy logs |
+
+### Suggested diagnostic routine
+
+<Steps>
+  <Step title="Capture the failure window" icon="play-circle">
+    Note the time of the failure and collect logs from two to five minutes before and after the event.
+  </Step>
+  <Step title="Compare against a successful run" icon="bar-chart">
+    Diff the log output and config settings so you can spot changes in inputs, permissions, or dependency versions.
+  </Step>
+  <Step title="Retry with a minimal configuration" icon="zap">
+    Reduce variables by disabling nonessential integrations, then test again with a known-good payload.
+  </Step>
+</Steps>
+
+### Final checks
+
+- Confirm that the endpoint returns a healthy response
+- Confirm that the token or service account has the expected scope
+- Confirm that the workflow payload matches the latest schema
+- Confirm that the dataset and labels are complete
+- Confirm that the logs identify the failing step
+
+<Expandable title="When to escalate" default-open="false">
+  
+  Escalate the issue when you have reproduced it with a minimal example, collected logs, and ruled out environment and permission problems. Include the exact command, timestamp, workspace, and error output so the next engineer can continue quickly.
+  
+</Expandable>

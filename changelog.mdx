@@ -1,0 +1,165 @@
+---
+title: Changelog
+description: Track the latest PerceptEye updates, improvements, and fixes. Review recent changes to understand new capabilities and any behavior updates that may affect your setup.
+---
+
+## Overview
+
+Use this changelog to track recent PerceptEye releases, reliability improvements, and behavior changes that may affect your deployment. This starter kit is intentionally generic, so you can adapt version numbers, release notes, and migration guidance to match your own product history.
+
+<Callout kind="info">
+  This is a starter kit template. Replace the sample entries, dates, and guidance with your own release history before publishing.
+</Callout>
+
+## Recent Releases
+
+<Update label="2026-10-12" description="v2.4.0" tags={["feature", "improvement"]}>
+
+### New Features
+
+- Added a release summary view so you can scan recent changes faster.
+- Introduced event tagging for feature, bugfix, and breaking changes.
+- Improved release note formatting for longer entries and migration guidance.
+
+### Improvements
+
+- Reduced load time for changelog pages with larger histories.
+- Standardized headings so you can compare versions more easily.
+- Improved readability on mobile and small-screen layouts.
+
+### Bug Fixes
+
+- Fixed a layout issue that could hide the latest update card.
+- Resolved inconsistent spacing in nested lists.
+- Corrected date sorting when entries were imported from CSV.
+
+</Update>
+
+<Update label="2026-09-18" description="v2.3.1" tags={["bugfix", "improvement"]}>
+
+### Bug Fixes
+
+- Fixed duplicate entries that could appear after a re-import.
+- Resolved a formatting issue affecting inline code in release notes.
+- Corrected a broken anchor link in older version entries.
+
+### Improvements
+
+- Improved error handling when release metadata is incomplete.
+- Added clearer fallback text when optional fields are missing.
+- Updated the ordering logic to keep the newest release at the top.
+
+</Update>
+
+<Update label="2026-08-27" description="v2.3.0" tags={["breaking", "feature"]}>
+
+### New Features
+
+- Added support for grouped release categories so you can organize notes by theme.
+- Introduced structured migration notes for breaking updates.
+- Added tag-based filtering for release history.
+
+### Breaking Changes
+
+- Release entries now use a required version label and date label.
+- Older unstructured notes may need a one-time migration to preserve ordering.
+- Tags should use consistent names across your changelog entries.
+
+### Migration Notes
+
+- Review older entries and convert them to the new format.
+- Confirm that each release has a clear version number.
+- Verify that links and references still point to the correct documentation pages.
+
+</Update>
+
+## Version History
+
+| Date | Version | Type | Summary |
+|------|---------|------|---------|
+| 2026-10-12 | v2.4.0 | Feature | Added release summaries, tags, and cleaner formatting. |
+| 2026-09-18 | v2.3.1 | Bugfix | Improved reliability and fixed duplicate entry handling. |
+| 2026-08-27 | v2.3.0 | Breaking | Introduced structured release notes and migration support. |
+
+## Release Workflow
+
+<Steps>
+  <Step title="Draft the release notes" icon="book-open">
+
+Write a short summary of what changed, why it matters, and who is affected. Keep the language direct and specific.
+
+  </Step>
+  <Step title="Review for impact" icon="shield">
+
+Check for breaking changes, deprecations, and configuration updates before publishing.
+
+  </Step>
+  <Step title="Publish the entry" icon="check-circle">
+
+Add the final release note, verify the date, and confirm that the newest version appears first.
+
+  </Step>
+</Steps>
+
+## Changelog Format
+
+<Columns cols={3}>
+  <Card title="Feature releases" icon="zap" href="#recent-releases">
+    Use this section for new capabilities, workflow changes, and visible product improvements.
+  </Card>
+  <Card title="Bug fixes" icon="x-circle" href="#recent-releases">
+    Use this section for reliability work, regressions, and correctness updates.
+  </Card>
+  <Card title="Breaking changes" icon="alert-triangle" href="#recent-releases">
+    Use this section for incompatible updates and migration instructions.
+  </Card>
+</Columns>
+
+## Writing Guidelines
+
+<CodeGroup tabs="Markdown,JSON">
+  ```markdown
+## Release note example
+
+### New Features
+
+- Added support for team-level release ownership.
+- Improved search for past versions.
+  ```
+
+  ```json
+{
+  "label": "2026-10-12",
+  "description": "v2.4.0",
+  "tags": ["feature", "improvement"]
+}
+  ```
+</CodeGroup>
+
+## Common Questions
+
+<Expandable title="How often should you update the changelog?" default-open="true">
+
+Update it whenever you ship user-facing changes, important fixes, or behavior updates that affect setup or usage.
+
+</Expandable>
+
+<Expandable title="Should you include internal refactors?" default-open="false">
+
+Include them only when they change performance, reliability, or how users interact with the product.
+
+</Expandable>
+
+<Expandable title="How do you document a migration?" default-open="false">
+
+Describe what changed, who must act, and the exact steps needed to move to the new version safely.
+
+</Expandable>
+
+## Next Steps
+
+Use this page as a starting point and replace the sample content with your own release process, version history, and migration guidance. If you maintain multiple environments or product lines, you can extend the same structure for each one.
+
+<Callout kind="tip">
+  Keep each entry concise, date-stamped, and action-oriented so users can quickly identify what changed.
+</Callout>

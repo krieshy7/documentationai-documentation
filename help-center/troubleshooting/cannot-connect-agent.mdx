@@ -1,0 +1,28 @@
+---
+title: Agent Connection Issues
+description: Fix problems connecting your Percepteye Agent.
+---
+
+## Symptoms
+
+- Agent status offline in dashboard
+- Setup script returns connection error
+
+## Quick Fix
+
+<Steps>
+  <Step title="Check API Token">
+    ````bash
+    # Ensure your PERCEPTEYE_TOKEN is correct
+    echo $PERCEPTEYE_TOKEN
+    ````
+  </Step>
+  <Step title="Network Access">
+    Make sure agent server can reach `api.percepteye.ai:443`.
+  </Step>
+  <Step title="Restart Agent">
+    ````bash
+    percepteye-agent restart
+    ````
+  </Step>
+</Steps>

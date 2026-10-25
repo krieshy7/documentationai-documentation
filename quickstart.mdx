@@ -1,0 +1,213 @@
+---
+title: Quickstart
+description: Set up your first PerceptEye project and complete an initial agent workflow in the shortest path possible. This page is designed to help you move from signup to a working deployment quickly.
+---
+
+## Overview
+
+PerceptEye helps you move from setup to a first working agent workflow quickly. In this starter kit, you will create a project, connect an environment, run discovery, launch an initial training cycle, and check results before you expand further.
+
+<Callout kind="info">
+  This page is a starter kit template. Adapt the names, workflows, and environment settings to match your own deployment.
+</Callout>
+
+## What you will complete
+
+Use this quick path to validate that your account, environment, and first workflow are connected end to end.
+
+<Columns cols={3}>
+  <Card title="Create a project" icon="book-open" href="#create-a-project">
+    Start with a clean workspace for your team, agents, and experiments.
+  </Card>
+  <Card title="Connect an environment" icon="settings" href="#connect-an-environment">
+    Add runtime access so PerceptEye can observe and train against real systems.
+  </Card>
+  <Card title="Verify results" icon="check-circle" href="#verify-results-and-next-steps">
+    Confirm that the workflow completed and identify the next improvements.
+  </Card>
+</Columns>
+
+## Quick start flow
+
+Follow the sequence below to get a first result with minimal setup.
+
+<Steps>
+  <Step title="Create a project" icon="plus-circle">
+    Create a project in your workspace and give it a name that reflects the system you are evaluating. Keep the scope focused so you can measure progress clearly.
+  </Step>
+  <Step title="Connect an environment" icon="plug">
+    Connect a staging or development environment first. This lets you validate discovery and training safely before you point the workflow at production systems.
+  </Step>
+  <Step title="Run discovery" icon="search">
+    Run your first discovery workflow to map candidate behaviors, observe current paths, and capture the signals you want to improve.
+  </Step>
+  <Step title="Launch training" icon="zap">
+    Launch a first training cycle using the discovered workflow library and your chosen success criteria.
+  </Step>
+  <Step title="Review outcomes" icon="bar-chart">
+    Check performance, quality, and cost metrics, then decide whether to promote the model or iterate again.
+  </Step>
+</Steps>
+
+## Install the CLI or SDK
+
+Pick the toolchain that matches your team. The examples below show a realistic onboarding flow using a project token and a workspace identifier.
+
+<CodeGroup tabs="npm,Python,cURL">
+  ```bash
+npm install @percepteye/sdk
+  ```
+
+  ```python
+from percepteye import PerceptEyeClient
+
+client = PerceptEyeClient(
+    api_key="YOUR_API_KEY",
+    workspace="acme-staging"
+)
+  ```
+
+  ```bash
+curl -X POST https://api.example.com/v1/projects \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"acme-staging","region":"us-east-1"}'
+  ```
+</CodeGroup>
+
+## Create a project
+
+Use a project to group one application, one environment, and one experiment stream. This keeps discovery data and training results easy to compare.
+
+<Tabs>
+  <Tab title="Dashboard" icon="monitor">
+    Create a project from the web console, then add a name, region, and owner. Use a descriptive label such as `support-agent-staging` or `checkout-agent-prod`.
+  </Tab>
+  <Tab title="API" icon="code">
+    The API is useful when you want to automate provisioning across teams or environments.
+
+    ```bash
+    curl -X POST https://api.example.com/v1/projects \
+      -H "Authorization: Bearer YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "name": "support-agent-staging",
+        "description": "Primary evaluation project for support automation",
+        "region": "us-east-1"
+      }'
+    ```
+  </Tab>
+</Tabs>
+
+## Connect an environment
+
+After you create the project, connect the first environment you want to observe. Start with a non-production environment so you can validate access and instrumentation safely.
+
+<Callout kind="tip">
+  Use a staging environment for the first run. That gives you realistic traffic patterns without risking customer-facing changes.
+</Callout>
+
+### Recommended environment settings
+
+| Setting | Suggested value | Why it helps |
+|---------|------------------|--------------|
+| Environment name | `staging` | Keeps your first workflow isolated |
+| Region | `us-east-1` | Matches common cloud defaults |
+| Access token | `YOUR_API_KEY` | Authenticates the SDK and API |
+| Sample window | `24h` | Gives you enough data for a first pass |
+
+## Run your first discovery workflow
+
+Discovery helps PerceptEye map behavior patterns before training begins. You should aim to collect a representative slice of requests, decisions, and outcomes.
+
+```javascript
+import { PerceptEye } from "@percepteye/sdk";
+
+const client = new PerceptEye({
+  apiKey: process.env.PERCEPTEYE_API_KEY,
+  workspace: "acme-staging",
+});
+
+async function runDiscovery() {
+  const job = await client.discovery.create({
+    projectId: "proj_01J8Y8Q2A7",
+    source: "support-agent",
+    lookbackHours: 24,
+    includeTelemetry: true,
+  });
+
+  console.log("Discovery job created:", job.id);
+}
+
+runDiscovery().catch(console.error);
+```
+
+## Launch a first training cycle
+
+Once discovery completes, start a short training cycle with clear evaluation goals. Keep the first cycle small so you can confirm that the pipeline works before increasing scope.
+
+<CodeGroup tabs="JavaScript,Python">
+  ```javascript
+const training = await client.training.create({
+  projectId: "proj_01J8Y8Q2A7",
+  discoveryJobId: "disc_01J8Y9C4B1",
+  objective: "Improve resolution quality while reducing average inference cost",
+  baseModel: "general-instruct-small",
+  evaluation: {
+    successMetric: "task_completion",
+    minimumScore: 0.82
+  }
+});
+
+console.log("Training started:", training.id);
+  ```
+
+  ```python
+training = client.training.create({
+    "projectId": "proj_01J8Y8Q2A7",
+    "discoveryJobId": "disc_01J8Y9C4B1",
+    "objective": "Improve resolution quality while reducing average inference cost",
+    "baseModel": "general-instruct-small",
+    "evaluation": {
+        "successMetric": "task_completion",
+        "minimumScore": 0.82
+    }
+})
+
+print("Training started:", training["id"])
+  ```
+</CodeGroup>
+
+## Verify results and next steps
+
+When the training cycle finishes, review the output and decide whether to ship, iterate, or expand the workflow.
+
+<Expandable title="What to check after the first run" default-open="true">
+  
+- Discovery coverage: confirm that the workflow captured the systems and routes you expected.
+- Evaluation score: confirm that the model met your minimum quality target.
+- Cost trend: check whether the trained version reduced inference cost relative to the baseline.
+- Operational readiness: confirm that logging, rollout, and rollback paths are available.
+  
+</Expandable>
+
+<Expandable title="Common first-run issues" default-open="false">
+  
+- No telemetry collected: verify token permissions and environment connectivity.
+- Training never starts: confirm that discovery produced usable workflow data.
+- Low evaluation score: narrow the scope, improve input quality, or rerun discovery with better samples.
+  
+</Expandable>
+
+<Columns cols={2}>
+  <Card title="Authentication" icon="lock" href="/authentication" horizontal>
+    Learn how to configure secure access for SDK and API requests.
+  </Card>
+  <Card title="Configuration" icon="settings" href="/configuration" horizontal>
+    Review project-level settings and environment options.
+  </Card>
+</Columns>
+
+<Callout kind="success">
+  If you can create a project, run discovery, and start training, your core workflow is ready. From here, you can customize metrics, expand environments, and automate promotion.
+</Callout>
